@@ -3,6 +3,12 @@ import 'package:crypto_exchange_app/models/currency_model.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
+  // Allow http.Client to be injected, defaulting to a new instance if not provided.
+  final http.Client _client;
+
+  // Constructor for injection
+  ApiService({http.Client? client}) : _client = client ?? http.Client();
+
   Future<List<Currency>> fetchCurrencies() async {
     const String apiUrl = 'https://api.coingecko.com/api/v3/coins/markets';
     final Map<String, String> queryParams = {
