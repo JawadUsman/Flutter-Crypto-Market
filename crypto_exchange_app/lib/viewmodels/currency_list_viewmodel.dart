@@ -3,10 +3,14 @@ import 'package:crypto_exchange_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 
 class CurrencyListViewModel extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  // Allow ApiService to be injected, defaulting to a new instance if not provided.
+  final ApiService _apiService;
+
+  // Constructor for injection
+  CurrencyListViewModel({ApiService? apiService}) : _apiService = apiService ?? ApiService();
 
   List<Currency> _allCurrencies = [];
-  List<Currency> _filteredCurrencies = [];
+  // List<Currency> _filteredCurrencies = []; // This line seems redundant now as filtering is done in the getter
   String _searchQuery = '';
 
   List<Currency> get currencies {
@@ -30,11 +34,14 @@ class CurrencyListViewModel extends ChangeNotifier {
   Future<void> fetchCurrencies() async {
     _isLoading = true;
     _errorMessage = null;
-    notifyListeners();
+    // Crucially, notify listeners *before* the async gap if you want UI to update to loading state immediately.
+    // However, in view model tests, this specific timing might not be what you're testing unless
+    // you're also testing listener notifications.
+    notifyListeners(); 
 
     try {
       _allCurrencies = await _apiService.fetchCurrencies();
-      _filteredCurrencies = _allCurrencies; // Initialize filtered list
+      // _filteredCurrencies = _allCurrencies; // Redundant
     } catch (e) {
       _errorMessage = 'Failed to load currencies: $e';
     } finally {
